@@ -1,0 +1,11 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto" >
+
+    <item
+        android:id="@+id/points"
+        android:icon="@null"
+        android:title="@string/placeholder"
+        android:gravity="center"
+        app:showAsAction="ifRoom" />
+
+</menu>

@@ -1,0 +1,17 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/points"
+        android:icon="@null"
+        android:title="@string/placeholder"
+        android:gravity="center"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/action_barcode"
+        android:icon="@drawable/bars_code"
+        android:title="Scan"
+        android:layout_gravity="center"
+        app:showAsAction="always"
+        />
+</menu>

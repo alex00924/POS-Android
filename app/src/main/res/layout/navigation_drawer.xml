@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.bulletcart.videorewards.Views.ScrimInsetsFrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navigation_drawer_Layout"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:fitsSystemWindows="true"
+    android:layout_gravity="start"
+    app:insetForeground="@color/nav_foreground">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/space200"
+            android:clickable="true"
+            android:foreground="?selectableItemBackground"
+            tools:layout_height="@dimen/space120">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <com.android.volley.toolbox.NetworkImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/side_nav_bar"
+                    android:scaleType="centerCrop"
+                    tools:ignore="ContentDescription" />
+
+            </FrameLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <LinearLayout
+                    android:id="@+id/navigation_drawer_account_information"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:layout_alignParentBottom="false"
+                    android:paddingLeft="30dp"
+                    android:paddingTop="30dp"
+                    android:layout_centerVertical="true"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="80dp"
+                        android:orientation="horizontal">
+
+                        <RelativeLayout
+                            android:layout_width="90dp"
+                            android:layout_height="match_parent">
+                            <TextView
+                                android:id="@+id/nav_bar_user_state"
+                                android:layout_width="12dp"
+                                android:layout_height="12dp"
+                                android:layout_marginEnd="15dp"
+                                android:background="@drawable/state_off"
+                                android:layout_alignParentTop="true"
+                                android:layout_alignParentEnd="true"/>
+                            <ImageView
+                                android:layout_width="80dp"
+                                android:layout_height="match_parent"
+                                android:scaleType="centerCrop"
+                                android:src="@drawable/ic_profile"/>
+                        </RelativeLayout>
+
+                        <TextView
+                            android:id="@+id/nav_bar_point"
+                            android:layout_width="50dp"
+                            android:layout_height="50dp"
+                            android:layout_gravity="center_vertical"
+                            android:gravity="center"
+                            android:background="@drawable/circle_background"
+                            android:textColor="@color/colorAccent"
+                            android:textStyle="bold"
+                            android:layout_marginLeft="20dp"/>
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/nav_bar_display_name"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="@dimen/text_size_20"
+                            android:textColor="@color/white"
+                            android:text="@string/placeholder"
+                            tools:fontFamily="sans-serif-medium"/>
+
+                        <TextView
+                            android:id="@+id/nav_bar_display_email"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="@dimen/text_size_14"
+                            android:textColor="@color/white"
+                            android:text="@string/placeholder"
+                            tools:fontFamily="sans-serif-medium"
+                            android:paddingTop="@dimen/space5"/>
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <ImageView
+                    android:layout_width="@dimen/space64"
+                    android:layout_height="@dimen/space64"
+                    android:visibility="visible"
+                    android:layout_above="@id/navigation_drawer_account_information"
+                    android:src="@drawable/ic_instructions" />
+
+            </RelativeLayout>
+
+        </FrameLayout>
+
+        <!-- Drawer items -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/navigation_drawer_background"
+            android:clipToPadding="false"
+            android:paddingBottom="@dimen/space8"
+            android:paddingTop="@dimen/space8">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <FrameLayout
+                    android:id="@+id/nav_pos"
+                    style="@style/NavDrawerRowLayout">
+
+                    <com.bulletcart.videorewards.Views.TintOnStateImageView
+                        style="@style/NavDrawerRowItemIcon"
+                        android:src="@drawable/ic_shop"
+                        tools:ignore="ContentDescription"/>
+
+                    <TextView
+                        style="@style/NavDrawerRowItemText"
+                        android:text="@string/text_stores"
+                        tools:fontFamily="sans-serif-medium"/>
+
+                </FrameLayout>
+
+                <FrameLayout
+                    android:id="@+id/nav_daily_checkin"
+                    style="@style/NavDrawerRowLayout">
+
+                    <com.bulletcart.videorewards.Views.TintOnStateImageView
+                        style="@style/NavDrawerRowItemIcon"
+                        android:src="@drawable/ic_checkin"
+                        tools:ignore="ContentDescription"/>
+
+                    <TextView
+                        style="@style/NavDrawerRowItemText"
+                        android:text="@string/earn_bullets"
+                        tools:fontFamily="sans-serif-medium"/>
+
+                </FrameLayout>
+
+                <FrameLayout
+                    android:id="@+id/nav_transactions"
+                    style="@style/NavDrawerRowLayout">
+
+                    <com.bulletcart.videorewards.Views.TintOnStateImageView
+                        style="@style/NavDrawerRowItemIcon"
+                        android:src="@drawable/ic_transaction"
+                        tools:ignore="ContentDescription"/>
+
+                    <TextView
+                        style="@style/NavDrawerRowItemText"
+                        android:text="@string/fired_bullets"
+                        tools:fontFamily="sans-serif-medium"/>
+
+                </FrameLayout>
+                
+                <FrameLayout
+                    android:id="@+id/legal_policy"
+                    style="@style/NavDrawerRowLayout">
+
+                    <com.bulletcart.videorewards.Views.TintOnStateImageView
+                        style="@style/NavDrawerRowItemIcon"
+                        android:src="@drawable/ic_shield"
+                        tools:ignore="ContentDescription"/>
+
+                    <TextView
+                        style="@style/NavDrawerRowItemText"
+                        android:text="@string/legal_policy"
+                        tools:fontFamily="sans-serif-medium"/>
+
+                </FrameLayout>
+
+
+                <FrameLayout
+                    android:id="@+id/help"
+                    style="@style/NavDrawerRowLayout">
+
+                    <com.bulletcart.videorewards.Views.TintOnStateImageView
+                        style="@style/NavDrawerRowItemIcon"
+                        android:src="@drawable/ic_about"
+                        tools:ignore="ContentDescription"/>
+
+                    <TextView
+                        style="@style/NavDrawerRowItemText"
+                        android:text="@string/help"
+                        tools:fontFamily="sans-serif-medium"/>
+
+                </FrameLayout>
+
+                <View
+                    xmlns:android="http://schemas.android.com/apk/res/android"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/space1"
+                    android:layout_marginBottom="@dimen/space8"
+                    android:layout_marginTop="@dimen/space8"
+                    android:background="@color/nav_divider"/>
+
+                <FrameLayout
+                    android:id="@+id/nav_sign_in"
+                    style="@style/NavDrawerRowLayout">
+
+                    <com.bulletcart.videorewards.Views.TintOnStateImageView
+                        style="@style/NavDrawerRowItemIcon"
+                        android:src="@drawable/ic_login"
+                        tools:ignore="ContentDescription"/>
+
+                    <TextView
+                        style="@style/NavDrawerRowItemText"
+                        android:text="@string/sign_in"
+                        tools:fontFamily="sans-serif-medium"/>
+
+                </FrameLayout>
+
+                <FrameLayout
+                    android:id="@+id/nav_sign_up"
+                    style="@style/NavDrawerRowLayout">
+
+                    <com.bulletcart.videorewards.Views.TintOnStateImageView
+                        style="@style/NavDrawerRowItemIcon"
+                        android:src="@drawable/ic_signup"
+                        tools:ignore="ContentDescription"/>
+
+                    <TextView
+                        style="@style/NavDrawerRowItemText"
+                        android:text="@string/sign_up"
+                        tools:fontFamily="sans-serif-medium"/>
+
+                </FrameLayout>
+
+                <FrameLayout
+                    android:id="@+id/nav_sign_out"
+                    style="@style/NavDrawerRowLayout">
+
+                    <com.bulletcart.videorewards.Views.TintOnStateImageView
+                        style="@style/NavDrawerRowItemIcon"
+                        android:src="@drawable/ic_signout"
+                        tools:ignore="ContentDescription"/>
+
+                    <TextView
+                        style="@style/NavDrawerRowItemText"
+                        android:text="@string/sign_out"
+                        tools:fontFamily="sans-serif-medium"/>
+
+                </FrameLayout>
+
+            </LinearLayout>
+
+        </ScrollView>
+
+    </LinearLayout>
+
+</com.bulletcart.videorewards.Views.ScrimInsetsFrameLayout>

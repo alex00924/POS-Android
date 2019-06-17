@@ -1,0 +1,63 @@
+{
+  "project_info": {
+    "project_number": "801215264041",
+    "firebase_url": "https://bulletcart-videorewards.firebaseio.com",
+    "project_id": "bulletcart-videorewards",
+    "storage_bucket": "bulletcart-videorewards.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:801215264041:android:50adcb6a17d2edee",
+        "android_client_info": {
+          "package_name": "com.bulletcart.videorewards"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "801215264041-docsg5b9qh30sabe9uq0o7np8llpee7b.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bulletcart.videorewards",
+            "certificate_hash": "5d1d2a92b5bf4480e53bc850a6670208b9e1e954"
+          }
+        },
+        {
+          "client_id": "801215264041-a6vsaka58vcnvetllsliop00ohhsldoo.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bulletcart.videorewards",
+            "certificate_hash": "61418e52386ff30de3522fcfca1b16ec2d972b53"
+          }
+        },
+        {
+          "client_id": "801215264041-i7hfmeid0f87idvobc1uqitdcj852ghu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCh5H8VDPSXGxvBnX85DkoYEzzlTQbwaRc"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "801215264041-i7hfmeid0f87idvobc1uqitdcj852ghu.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
