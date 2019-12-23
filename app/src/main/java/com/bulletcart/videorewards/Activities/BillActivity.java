@@ -58,6 +58,11 @@ public class BillActivity extends ActivityBase {
 
         lv_invoice_products = findViewById(R.id.invoice_products);
 
+        if(!GlobalVariables.BUSINESS_IS_DELYVERY)
+        {
+            findViewById(R.id.delivery_price_layout).setVisibility(View.GONE);
+            findViewById(R.id.delivery_price_tax_layout).setVisibility(View.GONE);
+        }
     }
 
     private void setVariable() {
@@ -91,6 +96,11 @@ public class BillActivity extends ActivityBase {
 
         GlobalVariables.USED_POINTS_TO_CHECK = 0;
         GlobalVariables.TOTAL_PRICE_TO_CHECK = 0;
+
+        if(GlobalVariables.BUSSINESS_CAN_DELIVEY && GlobalVariables.BUSINESS_IS_DELYVERY) {
+            ((TextView) findViewById(R.id.txt_delvery_price_tax)).setText(String.valueOf(GlobalFunctions.getDeliveryTax()));
+            ((TextView) findViewById(R.id.txt_delvery_price)).setText(String.valueOf(GlobalFunctions.getDeliveryPrice()));
+        }
     }
 
     @Override

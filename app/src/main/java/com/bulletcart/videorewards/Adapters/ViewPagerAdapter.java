@@ -30,11 +30,18 @@ public class ViewPagerAdapter extends FragmentStatePagerAdapter {
     public Fragment getItem(int position) {
 
         if(position == 0) {
+            StoresFragment storesFragment = new StoresFragment();
+            storesFragment.setType(0);
+            return storesFragment;
+        }
+        else if( position == 1 )
+        {
+            StoresFragment restaurantFrag = new StoresFragment();
+            restaurantFrag.setType(1);
+            return restaurantFrag;
 
-//            return new HomeFragment();
-            return new StoresFragment();
-
-        }else{
+        }
+        else{
             return new VideosFragment();
 //            return new TransactionsFragment();
 

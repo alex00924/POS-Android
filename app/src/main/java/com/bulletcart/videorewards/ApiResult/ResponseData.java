@@ -5,4 +5,5 @@ public class ResponseData {
     public int code;
     public String message;
     public int amount;
+    public String order_uid;
 }

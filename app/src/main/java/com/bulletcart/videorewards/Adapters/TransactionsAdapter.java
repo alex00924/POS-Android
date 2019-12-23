@@ -70,16 +70,16 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
 
         if (TnType.equals("cr")){
 
-            holder.amount.setText("+ " + transaction.getAmount());
+            holder.amount.setText("" + transaction.getAmount());
             holder.amount.setTextColor(context.getResources().getColor(R.color.green));
 
         }else if(TnType.equals("db")){
 
-            holder.amount.setText("- " + transaction.getAmount());
+            holder.amount.setText("" + (-1) * transaction.getAmount());
             holder.amount.setTextColor(context.getResources().getColor(R.color.red));
         }else if(TnType.equals("pos")){
 
-            holder.amount.setText("- " + transaction.getAmount());
+            holder.amount.setText("" + (-1) * transaction.getAmount());
             holder.amount.setTextColor(context.getResources().getColor(R.color.red));
         }
 

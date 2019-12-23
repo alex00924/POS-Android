@@ -13,17 +13,17 @@ import java.util.List;
  */
  
 public class GlobalConstants {
-    public static String SERVER_URL = "http://127.0.0.1/";
-
-    public static final String POS_SERVER_URL = "http://127.0.0.1:8000";
-
 //      public static String SERVER_URL = "http://10.0.2.2/";
-//
 //      public static final String POS_SERVER_URL = "http://10.0.2.2:8000";
-    /*
-          public static String SERVER_URL = "https://advertise.bulletcart.store/";
-          public static final String POS_SERVER_URL = "https://bulletcart.store";
-    */
+
+//    public static String SERVER_URL = "http://10.0.3.2/";
+//    public static final String POS_SERVER_URL = "http://10.0.3.2:8000";
+//    public static String SERVER_URL = "http://127.0.0.1/";
+//    public static final String POS_SERVER_URL = "http://127.0.0.1:8000";
+
+    public static String SERVER_URL = "https://advertise.bulletcart.store/";
+    public static final String POS_SERVER_URL = "https://bulletcart.store";
+
     // Manual/Email Login and Signup enable = true || disable = false
     public static Boolean ENABLE_EMAIL_LOGIN = true;
 
@@ -94,4 +94,16 @@ public class GlobalConstants {
     public static Boolean DEBUG_MODE = App.getInstance().get("APP_DEBUG_MODE",false);
 
     public static final String LICENSE_COPY = "http://www.codyhub.com/item/video-rewards-android-app";
+
+    public static int BUSINESS_TYPE_STORE = 0;              //business type
+    public static int BUSINESS_TYPE_RESTAURANT = 1;
+
+    public static final int PAYMENT_CASH = 1;              //payment methods, is used in delivery
+    public static final int PAYMENT_CARD = 2;
+
+    public static String PUSHER_ORDER_CONFIRM = "Confirm order-";
+    public static String PUSHER_ORDER_CANCEL = "Cancel order-";
+    public static String PUSHER_PENDING_ORDER_CONFIRM = "Confirm pending order-";
+    public static String PUSHER_PENDING_ORDER_CANCEL = "Cancel pending order-";
+
 }

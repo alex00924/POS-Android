@@ -1,40 +1,45 @@
 package com.bulletcart.videorewards.Adapters;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.ImageView;
-
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bulletcart.videorewards.Activities.ScanActivity;
 import com.bulletcart.videorewards.Global.GlobalConstants;
+import com.bulletcart.videorewards.Global.GlobalFunctions;
 import com.bulletcart.videorewards.Global.GlobalVariables;
+import com.bulletcart.videorewards.Model.Business;
 import com.bulletcart.videorewards.Model.Store;
 import com.bulletcart.videorewards.R;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 
-
 import java.util.List;
 
-import de.hdodenhof.circleimageview.CircleImageView;
-
-public class StoresRecyclerAdapter extends RecyclerView.Adapter<StoresRecyclerAdapter.ViewHolder>{
+public class BusinessRecyclerAdapter extends RecyclerView.Adapter<BusinessRecyclerAdapter.ViewHolder>{
 
     private Context context;
-    private List<Store> listItem;
-
-    public StoresRecyclerAdapter(Context context, List<Store> listItem) {
+    private List<Business> listItem;
+    private int m_nType;
+    public BusinessRecyclerAdapter(Context context, List<Business> listItem, int nType) {
         this.context = context;
         this.listItem = listItem;
+        this.m_nType = nType;
     }
 
     @NonNull
@@ -48,45 +53,45 @@ public class StoresRecyclerAdapter extends RecyclerView.Adapter<StoresRecyclerAd
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
 
-        final Store store = listItem.get(position);
+        final Business business = listItem.get(position);
 
         Glide.with(context)
-                .load(GlobalConstants.PRODUCT_BUSINESS_LOGO_URL + store.logo)
+                .load(GlobalConstants.PRODUCT_BUSINESS_LOGO_URL + business.logo)
                 .apply(new RequestOptions().override(80,80))
                 .apply(RequestOptions.placeholderOf(R.drawable.ic_place_holder))
                 .apply(RequestOptions.diskCacheStrategyOf(DiskCacheStrategy.NONE))
                 .apply(RequestOptions.skipMemoryCacheOf(true))
                 .into(holder.iv_logo_wrapper);
 
-        holder.tv_name.setText(store.name);
-        holder.tv_business_name.setText(store.business_name);
+        holder.tv_name.setText(business.name);
+        holder.tv_business_name.setText(business.name);
         holder.tv_name.setSelected(true);
 
         holder.SingleItem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                GlobalVariables.BUSINESS_ID = store.getBusiness_id();
-                GlobalVariables.LOCATION_ID = store.getId();
-                GlobalVariables.SHOP_NAME = store.getName();
-                GlobalVariables.BUSINESS_NAME = store.name;
-                Log.e("BUSINESS_NAME------::", store.name);
-                GlobalVariables.BUSINESS_CURRENCY = store.getCurrency();
-                GlobalVariables.BUSINESS_CURRENCY_STRING = store.getCurrency_string();
-                GlobalVariables.BUSINESS_MERCHANT_CURRENCY = store.merchant_currency;
-                GlobalVariables.BUSINESS_TAX_TYPE = store.getTax_type();
-                GlobalVariables.BUSINESS_TAX = store.getTax();
-                GlobalVariables.BUISINESS_DEFAULT_DISCOUNT = store.default_sales_discount;// / 100;
-                GlobalVariables.BUSINESS_DEFAULT_PRICE_GROUPS = store.selling_group;
-                GlobalVariables.BUSSINESS_CAN_DELIVEY = store.can_delivery;
-                GlobalVariables.BUSSINESS_DELIVERY_AREA = store.delivery_area;
-                GlobalVariables.BUSSINESS_DELIVERY_CHARGE = store.delivery_charge;
-                GlobalVariables.BUSSINESS_DELIVEY_TAX_TYPE = store.delivery_tax_type;
-                GlobalVariables.BUSSINESS_DELIVEY_TAX = store.delivery_tax;
-                GlobalVariables.BUSSINESS_DELIVEY_IS_MINIMUM = store.delivery_is_minimum;
-                GlobalVariables.BUSSINESS_DELIVEY_MINIMUM = store.delivery_minimum;
-                Intent intent = new Intent(context, ScanActivity.class);
-                context.startActivity(intent);
 
+                GlobalVariables.BUSINESS_TYPE = m_nType;
+                final Dialog LocationDlg = new Dialog(context);
+                LocationDlg.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                LocationDlg.setContentView(R.layout.dialog_location_layout);
+                LocationDlg.getWindow().setLayout(((GlobalFunctions.getWidth(context) / 100) * 90), ((GlobalFunctions.getHeight(context) / 100) * 80));
+                RecyclerView listLocation = LocationDlg.findViewById(R.id.list_location);
+                listLocation.setHasFixedSize(true);
+                RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(context);
+                listLocation.setLayoutManager(layoutManager);
+                listLocation.setItemAnimator(new DefaultItemAnimator());
+                listLocation.setAdapter(new StoresRecyclerAdapter(context, business.locations));
+
+                View btn_cancel = LocationDlg.findViewById(R.id.btn_cancel);
+                btn_cancel.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        LocationDlg.dismiss();
+                    }
+                });
+
+                LocationDlg.show();
             }
         });
 

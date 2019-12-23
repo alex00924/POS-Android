@@ -21,7 +21,7 @@ public class StoresActivity extends ActivityBase {
 
     private ListView stores;
     StoresListAdapter mAdapter;
-
+    private int m_nType = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,6 +54,12 @@ public class StoresActivity extends ActivityBase {
                 GlobalVariables.BUSINESS_CURRENCY_STRING = GlobalVariables.STORES.get(i).currency_string;
                 GlobalVariables.BUISINESS_DEFAULT_DISCOUNT = GlobalVariables.STORES.get(i).default_sales_discount;
                 GlobalVariables.BUSINESS_DEFAULT_PRICE_GROUPS = GlobalVariables.STORES.get(i).selling_group;
+                GlobalVariables.BUSSINESS_CAN_DELIVEY = GlobalVariables.STORES.get(i).can_delivery;
+                GlobalVariables.BUSSINESS_DELIVERY_AREA = GlobalVariables.STORES.get(i).delivery_area;
+                GlobalVariables.BUSSINESS_DELIVERY_CHARGE = GlobalVariables.STORES.get(i).delivery_charge;
+                GlobalVariables.BUSSINESS_DELIVEY_TAX_TYPE = GlobalVariables.STORES.get(i).delivery_tax_type;
+                GlobalVariables.BUSSINESS_DELIVEY_IS_MINIMUM = GlobalVariables.STORES.get(i).delivery_is_minimum;
+                GlobalVariables.BUSSINESS_DELIVEY_MINIMUM = GlobalVariables.STORES.get(i).delivery_minimum;
                 Intent intent = new Intent(StoresActivity.this, ScanActivity.class);
                 startActivity(intent);
                 finish();
@@ -98,12 +104,12 @@ public class StoresActivity extends ActivityBase {
 
     public void getStores() {
         showpDialog();
-        ApiUtil.get_stores(new Notify() {
+        ApiUtil.get_stores(m_nType, new Notify() {
             @Override
             public void onSuccess(Object object) {
                 final StoreInfoResult data = (StoreInfoResult) object;
                 GlobalVariables.STORES.clear();
-                GlobalVariables.STORES.addAll(data.stores);
+//                GlobalVariables.STORES.addAll(data.stores);
                 mAdapter.notifyDataSetChanged();
                 hidepDialog();
             }

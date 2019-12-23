@@ -71,8 +71,8 @@ public class Transactions {
 		this.Cat2 = Cat2;
 	}
 
-	public String getAmount() {
-		return Amount;
+	public int getAmount() {
+		return Integer.valueOf(Amount);
 	}
 
 	public void setAmount(String Amount) {

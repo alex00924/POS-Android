@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
     <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
@@ -16,15 +12,12 @@
             android:layout_height="wrap_content"
             android:textSize="22sp"
             android:layout_marginTop="10dp"
+            android:layout_marginBottom="20dp"
             android:gravity="center"
             android:textColor="#4CAF50"
-            android:text="@string/purchase_success"/>
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="180dp"
-            android:src="@drawable/check_success_green"/>
+            android:text="@string/enter_card_content"/>
         <Button
-            android:id="@+id/btn_close"
+            android:id="@+id/btn_ok"
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
             android:gravity="center"
@@ -32,6 +25,5 @@
             android:textStyle="bold"
             android:textSize="18sp"
             android:background="@color/white"
-            android:text="@string/btn_close"/>
+            android:text="@string/ok"/>
     </LinearLayout>
-</android.support.constraint.ConstraintLayout>

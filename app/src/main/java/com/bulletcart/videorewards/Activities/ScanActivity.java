@@ -8,45 +8,68 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.os.Bundle;
+import android.support.v7.widget.AppCompatRadioButton;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bulletcart.videorewards.Adapters.ListViewAdapter;
+import com.bulletcart.videorewards.ApiResult.DeliveryProductInfoResult;
 import com.bulletcart.videorewards.ApiResult.GroupPrice;
 import com.bulletcart.videorewards.ApiResult.ProductInfoResult;
 import com.bulletcart.videorewards.ApiResult.ResponseData;
+import com.bulletcart.videorewards.Global.GlobalConstants;
 import com.bulletcart.videorewards.Global.GlobalFunctions;
 import com.bulletcart.videorewards.Global.GlobalVariables;
 import com.bulletcart.videorewards.Model.ProductInfo;
+import com.bulletcart.videorewards.Model.TableInfo;
 import com.bulletcart.videorewards.R;
 import com.bulletcart.videorewards.Utils.ApiUtil;
 import com.bulletcart.videorewards.Utils.Notify;
 import com.bulletcart.videorewards.Views.TintOnStateImageView;
 import com.bulletcart.videorewards.app.App;
+import com.bumptech.glide.load.model.stream.BaseGlideUrlLoader;
 import com.daimajia.swipe.util.Attributes;
 import com.google.android.gms.common.api.CommonStatusCodes;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.zxing.client.android.Intents;
+import com.pusher.client.Pusher;
+import com.pusher.client.PusherOptions;
+import com.pusher.client.channel.Channel;
+import com.pusher.client.channel.SubscriptionEventListener;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -60,6 +83,7 @@ public class ScanActivity extends ActivityBase implements View.OnClickListener, 
 
     public ListView list;
     public TextView totalRate;
+    public TextView totalRate_;
     private float   fTotVal;
     ListViewAdapter mAdapter = null;
 
@@ -72,7 +96,7 @@ public class ScanActivity extends ActivityBase implements View.OnClickListener, 
     public final static int REQUEST_CODE_ASK_PERMISSIONS = 1;
 
     private static final int RC_BARCODE_CAPTURE = 9001;
-
+    private static final int RC_CHECKOUT = 9002;
     private int used_point = 0;
     private String currency_used_point = "0.0";
     Button edt_barcode;
@@ -80,8 +104,15 @@ public class ScanActivity extends ActivityBase implements View.OnClickListener, 
     private static App mInstance;
 
     private Dialog m_GroupDlg;
+    private Dialog m_MethodDlg;
+    private Dialog m_OrderDlg;
+
+    private Button m_btnOrder;
 
     private ProductInfo m_selectedProduct;
+    private TableInfo m_resTables;
+
+    private boolean m_Clean = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,15 +128,29 @@ public class ScanActivity extends ActivityBase implements View.OnClickListener, 
         initVariable();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+    }
+
+    @Override
+    protected void onPause() {
+//        if( m_MethodDlg != null) {
+//            m_MethodDlg.dismiss();
+//            m_MethodDlg = null;
+//        }
+        super.onPause();
+    }
+
+
     public void initVariable() {
 
-        if (GlobalVariables.SELECTED_PRODUCTS.size() > 0) {
-            isProductLists(true);
+        if(m_Clean) {
+            GlobalVariables.SELECTED_PRODUCTS.clear();
         }
-
         mAdapter = new ListViewAdapter(mContext, list, GlobalVariables.SELECTED_PRODUCTS, this);
         list.setAdapter(mAdapter);
-        mAdapter.setMode(Attributes.Mode.Single);
 
         updateRate();
 
@@ -124,11 +169,11 @@ public class ScanActivity extends ActivityBase implements View.OnClickListener, 
 
         edt_barcode.setOnClickListener(this);
 
-
         btn_pay.setOnClickListener(this);
 
         list = findViewById(R.id.list);
         totalRate = findViewById(R.id.totalRate);
+        totalRate_ = findViewById(R.id.totalRate_);
 
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -140,6 +185,82 @@ public class ScanActivity extends ActivityBase implements View.OnClickListener, 
                 overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_up);
             }
         });
+
+        m_btnOrder = findViewById(R.id.btn_order);
+        m_btnOrder.setOnClickListener(this);
+
+        if(!m_Clean) {
+            showDeliveryView(true);
+            return;
+        }
+        //this location can delivery, show select delivery or direct sell dialog
+        if( GlobalVariables.BUSSINESS_CAN_DELIVEY )
+            showMethodDlg();
+        else
+        {
+            GlobalVariables.BUSINESS_IS_DELYVERY = false;
+            if(GlobalVariables.BUSINESS_TYPE == GlobalConstants.BUSINESS_TYPE_RESTAURANT)
+            {
+                showDineinView();
+                getAllProducts();
+                getTables();
+            }
+            else
+                showDeliveryView(false);
+        }
+    }
+
+    //show/hide some views in the case of dine in restaurant
+    private void showDineinView()
+    {
+        m_btnOrder.setVisibility(View.GONE);
+        btn_pay.setVisibility(View.VISIBLE);
+        edt_barcode.setVisibility(View.GONE);
+        iv_scanner.setVisibility(View.GONE);
+        tv_instructor.setVisibility(View.GONE);
+
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.MATCH_PARENT,
+                RelativeLayout.LayoutParams.MATCH_PARENT
+        );
+        params.setMargins(0, 0, 0, 65);
+        list.setLayoutParams(params);
+    }
+
+    //show/hide delivery related views
+    //param = true : show delivery views, false: hide delivery views
+    private void showDeliveryView(boolean bDeliveryShow)
+    {
+        if( !bDeliveryShow )
+        {
+            m_btnOrder.setVisibility(View.GONE);
+            btn_pay.setVisibility(View.VISIBLE);
+            edt_barcode.setVisibility(View.VISIBLE);
+            iv_scanner.setVisibility(View.VISIBLE);
+            tv_instructor.setVisibility(View.VISIBLE);
+
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+                    RelativeLayout.LayoutParams.MATCH_PARENT,
+                    RelativeLayout.LayoutParams.MATCH_PARENT
+            );
+            params.setMargins(0, 0, 0, 110);
+            list.setLayoutParams(params);
+        }
+        else
+        {
+            m_btnOrder.setVisibility(View.VISIBLE);
+            btn_pay.setVisibility(View.GONE);
+            edt_barcode.setVisibility(View.GONE);
+            iv_scanner.setVisibility(View.GONE);
+            tv_instructor.setVisibility(View.GONE);
+
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+                    RelativeLayout.LayoutParams.MATCH_PARENT,
+                    RelativeLayout.LayoutParams.MATCH_PARENT
+            );
+            params.setMargins(0, 0, 0, 65);
+            list.setLayoutParams(params);
+        }
     }
 
     public void listVisibiltiy() {
@@ -165,8 +286,11 @@ public class ScanActivity extends ActivityBase implements View.OnClickListener, 
             tv_instructor.setVisibility(View.GONE);
         } else {
             list.setVisibility(View.GONE);
-            iv_scanner.setVisibility(View.VISIBLE);
-            tv_instructor.setVisibility(View.VISIBLE);
+            //in the case of store and isn't delivery
+            if( !GlobalVariables.BUSINESS_IS_DELYVERY && GlobalVariables.BUSINESS_TYPE == GlobalConstants.BUSINESS_TYPE_STORE) {
+                iv_scanner.setVisibility(View.VISIBLE);
+                tv_instructor.setVisibility(View.VISIBLE);
+            }
         }
     }
 
@@ -220,21 +344,13 @@ public class ScanActivity extends ActivityBase implements View.OnClickListener, 
                 hidepDialog();
                 ProductInfoResult data = (ProductInfoResult) object;
                 m_selectedProduct = data.productInfo;
-
-                //if this store/restaurant is available for default selling price group
-                if( !GlobalVariables.BUSINESS_DEFAULT_PRICE_GROUPS.isEmpty() )
-                {
-                    showGroupDlg();
+                if(!existAlready(m_selectedProduct)) {
+                    m_selectedProduct.amount = 1;
+                    GlobalVariables.SELECTED_PRODUCTS.add(m_selectedProduct);
                 }
-                else
-                {
-                    if(!existAlready(m_selectedProduct)) {
-                        GlobalVariables.SELECTED_PRODUCTS.add(m_selectedProduct);
-                    }
 
-                    setListData();
-                    updateRate();
-                }
+                setListData();
+                updateRate();
             }
 
             @Override
@@ -298,10 +414,22 @@ public class ScanActivity extends ActivityBase implements View.OnClickListener, 
             totalvalue = GlobalFunctions.roundToDecimal(data1.amount * Float.parseFloat(data1.getUnitPrice()), 3);
             totalv = totalv + totalvalue;
         }
+        GlobalVariables.TOTAL_PAIABLE_WITHOUT_DELIVERY = totalv;
+        if( GlobalVariables.BUSINESS_IS_DELYVERY && totalv > 1 ) {
+            totalv += GlobalFunctions.getDeliveryPrice() + GlobalFunctions.getDeliveryTax();
+        }
+
+        //if this is first time to add product in cart, show toast message.
+        if( GlobalVariables.TOTAL_PRICE_TO_CHECK < 1 && totalv > 1 && GlobalVariables.BUSINESS_IS_DELYVERY ) {
+            String strMsg = "Delivery fee: " + GlobalFunctions.getDeliveryPrice() + "\n";
+            strMsg += "Delivery tax: " + GlobalFunctions.getDeliveryTax();
+            Toast.makeText(ScanActivity.this, strMsg, Toast.LENGTH_LONG).show();
+        }
 
         GlobalVariables.TOTAL_PRICE_TO_CHECK = totalv;
         fTotVal = totalv;
         totalRate.setText(String.format("%s%.2f", currency_mark, totalv));
+        totalRate_.setText(String.format("%s%.2f", currency_mark, totalv));
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -350,22 +478,25 @@ public class ScanActivity extends ActivityBase implements View.OnClickListener, 
                 alertDialog.show();
                 break;
             case R.id.payButton:
-                if(mAdapter.getData().size() >0){
-                    AlertDialog pointAlertDialog = new ScanActivity.paymentPointAlertDialog(mContext);
+            case R.id.btn_order:
+                updateRate();
+                if(GlobalVariables.TOTAL_PRICE_TO_CHECK >0){
+                    AlertDialog pointAlertDialog = new ScanActivity.paymentPointAlertDialog(mContext, true);
                     pointAlertDialog.show();
                 }else{
-                    Toast toast=  Toast.makeText(getApplicationContext(), "Please Scan the Products...", Toast.LENGTH_LONG);
+                    Toast toast=  Toast.makeText(getApplicationContext(), "Please Add the Products...", Toast.LENGTH_LONG);
                     toast.setGravity(Gravity.TOP,0,150);
                     toast.show();
                 }
                 break;
+                //showOrderDlg();
         }
     }
 
     /** Show point dialog */
     private class paymentPointAlertDialog extends AlertDialog {
 
-        paymentPointAlertDialog(final Context context) {
+        paymentPointAlertDialog(final Context context, boolean bCancelShow) {
             super(context);
             LayoutInflater inflater = getLayoutInflater();
             View view = inflater.inflate(R.layout.use_points_alert_dialog, null);
@@ -435,10 +566,20 @@ public class ScanActivity extends ActivityBase implements View.OnClickListener, 
                     float total_price_to_check = GlobalVariables.TOTAL_PRICE_TO_CHECK- Float.parseFloat(currency_used_point);
                     GlobalVariables.TOTAL_PRICE_TO_CHECK = GlobalFunctions.roundToDecimal(total_price_to_check, 6);
                     GlobalVariables.USED_POINTS_TO_CHECK = used_point;
+                    GlobalVariables.TOTAL_PAIABLE_WITHOUT_DELIVERY = GlobalVariables.TOTAL_PRICE_TO_CHECK;
+                    if( GlobalVariables.BUSINESS_IS_DELYVERY ) {
+                        GlobalVariables.TOTAL_PAIABLE_WITHOUT_DELIVERY = GlobalVariables.TOTAL_PRICE_TO_CHECK - GlobalFunctions.getDeliveryPrice() - GlobalFunctions.getDeliveryTax();
+                    }
                     dismiss();
-                    Intent cashCheckOut = new Intent(context, CashCheckOutActivity.class);
-                    context.startActivity(cashCheckOut);
-                    finish();
+                    if(GlobalVariables.BUSINESS_IS_DELYVERY) {
+                        GlobalVariables.BUSINESS_PAYMENT_TYPE = GlobalConstants.PAYMENT_CASH;
+                        showOrderDlg();
+                    }
+                    else {
+                        Intent cashCheckOut = new Intent(context, CashCheckOutActivity.class);
+                        context.startActivity(cashCheckOut);
+                        finish();
+                    }
                 }
             });
 
@@ -450,10 +591,15 @@ public class ScanActivity extends ActivityBase implements View.OnClickListener, 
                     currency_used_point = String.valueOf(calculated_currency);
 
                     GlobalVariables.CURRENCY_OF_USED_POINTS_TO_CHECK = currency_used_point;
-                    float total_price_to_check = fTotVal - Float.parseFloat(currency_used_point);
+                    float total_price_to_check = GlobalVariables.TOTAL_PRICE_TO_CHECK - Float.parseFloat(currency_used_point) ;//sgs
                     GlobalVariables.TOTAL_PRICE_TO_CHECK = GlobalFunctions.roundToDecimal(total_price_to_check, 6);
                     GlobalVariables.USED_POINTS_TO_CHECK = used_point;
+                    GlobalVariables.TOTAL_PAIABLE_WITHOUT_DELIVERY = GlobalVariables.TOTAL_PRICE_TO_CHECK;
+                    if( GlobalVariables.BUSINESS_IS_DELYVERY ) {
+                        GlobalVariables.TOTAL_PAIABLE_WITHOUT_DELIVERY = GlobalVariables.TOTAL_PRICE_TO_CHECK - GlobalFunctions.getDeliveryPrice() - GlobalFunctions.getDeliveryTax();
+                    }
                     dismiss();
+                    GlobalVariables.BUSINESS_PAYMENT_TYPE = GlobalConstants.PAYMENT_CARD;
                     get_braintree_token();
                 }
             });
@@ -464,6 +610,9 @@ public class ScanActivity extends ActivityBase implements View.OnClickListener, 
                     dismiss();
                 }
             });
+
+            if( !bCancelShow )
+                view.findViewById(R.id.cancel_layout).setVisibility(View.GONE);
         }
 
     }
@@ -556,7 +705,13 @@ public class ScanActivity extends ActivityBase implements View.OnClickListener, 
     public void onDecreaseClicked(ProductInfo productInfo) {
         mAdapter.notifyDataSetChanged();
         updateRate();
+    }
 
+    @Override
+    public void onPromoChanged()
+    {
+        mAdapter.notifyDataSetChanged();
+        updateRate();
     }
 
     //get braintree token to perform card payment
@@ -570,6 +725,9 @@ public class ScanActivity extends ActivityBase implements View.OnClickListener, 
                 ResponseData data = (ResponseData) object;
                 GlobalVariables.BRAINTREE_TOKEN = data.message;
                 if(data.code > 200 || data.amount >  GlobalVariables.TOTAL_PRICE_TO_CHECK ) { //if cannot use card for payment
+
+//                    updateRate();
+
                     AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
                     if( data.code > 200 )
                         builder.setMessage(getString(R.string.cardpay_error));
@@ -587,18 +745,32 @@ public class ScanActivity extends ActivityBase implements View.OnClickListener, 
                             new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    Intent cashCheckOut = new Intent(mContext, CashCheckOutActivity.class);
-                                    mContext.startActivity(cashCheckOut);
-                                    finish();
+                                    if(GlobalVariables.BUSINESS_IS_DELYVERY) {
+                                        GlobalVariables.BUSINESS_PAYMENT_TYPE = GlobalConstants.PAYMENT_CASH;
+                                        showOrderDlg();
+                                    }
+                                    else {
+                                        Intent cashCheckOut = new Intent(mContext, CashCheckOutActivity.class);
+                                        mContext.startActivity(cashCheckOut);
+                                        finish();
+                                    }
+//                                    Intent cashCheckOut = new Intent(mContext, CashCheckOutActivity.class);
+//                                    mContext.startActivity(cashCheckOut);
+//                                    finish();
                                 }
                             });
                     AlertDialog alertDialog = builder.create();
                     alertDialog.show();
 
                 } else {
-                    Intent cardCheckOut = new Intent(mContext, CheckOutActivity.class);
-                    startActivity(cardCheckOut);
-                    finish();
+                    if(GlobalVariables.BUSINESS_IS_DELYVERY) {
+                        showOrderDlg();
+                    }
+                    else {
+                        Intent cardCheckOut = new Intent(mContext, CheckOutActivity.class);
+                        startActivity(cardCheckOut);
+                        finish();
+                    }
                 }
 
             }
@@ -709,8 +881,11 @@ public class ScanActivity extends ActivityBase implements View.OnClickListener, 
             } else {
                 Toast.makeText(mContext, R.string.barcode_error, Toast.LENGTH_SHORT).show();
             }
-        }
-        else {
+        } else if (requestCode == RC_CHECKOUT) {
+            if (resultCode == Activity.RESULT_OK) {
+                m_Clean = false;
+            }
+        } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
     }
@@ -719,6 +894,7 @@ public class ScanActivity extends ActivityBase implements View.OnClickListener, 
     public void onBackPressed(){
         backtoStores();
     }
+
 
     private void showGroupDlg()
     {
@@ -767,5 +943,277 @@ public class ScanActivity extends ActivityBase implements View.OnClickListener, 
         });
 
         m_GroupDlg.show();
+    }
+
+
+    private void showMethodDlg()
+    {
+        m_MethodDlg = new Dialog(this);
+        m_MethodDlg.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        m_MethodDlg.setContentView(R.layout.dialog_method_layout);
+        m_MethodDlg.setCancelable(false);
+        final RadioGroup radioGroup = m_MethodDlg.findViewById(R.id.radio_method);
+
+        Button btn_ok = m_MethodDlg.findViewById(R.id.btn_ok);
+
+        btn_ok.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                m_MethodDlg.dismiss();
+                int nCheckedId = radioGroup.getCheckedRadioButtonId();
+                if( nCheckedId == R.id.radio_delivery )
+                {
+                    GlobalVariables.BUSINESS_IS_DELYVERY = true;
+                    showDeliveryView(true);
+
+                    getDeliveryProducts();
+                }
+                else
+                {
+                    GlobalVariables.BUSINESS_IS_DELYVERY = false;
+                    if(GlobalVariables.BUSINESS_TYPE == GlobalConstants.BUSINESS_TYPE_RESTAURANT)
+                    {
+                        showDineinView();
+                        getAllProducts();
+                        getTables();
+                    } else {
+                        showDeliveryView(false);
+                    }
+                }
+            }
+        });
+
+        m_MethodDlg.show();
+    }
+
+    private void showTableDlg()
+    {
+        if(m_resTables == null || m_resTables.tables == null || m_resTables.tables.size() < 1)
+            return;
+        final Dialog tableDlg = new Dialog(this);
+        tableDlg.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        tableDlg.setCancelable(false);
+        tableDlg .setContentView(R.layout.dialog_table_layout);
+        Button btn_ok = tableDlg.findViewById(R.id.btn_ok);
+        final RadioGroup radioGroup = tableDlg.findViewById(R.id.radio_table_group);
+        for(int i = 0 ; i < m_resTables.tables.size() ; i ++ )
+        {
+            AppCompatRadioButton radioButton = new AppCompatRadioButton (this);
+            if( i == 0 )
+                radioButton.setChecked(true);
+            radioButton.setText(m_resTables.tables.get(i).name);
+            radioButton.setId(i);
+            radioButton.setTextColor(Color.parseColor("#ffffff"));
+            if(Build.VERSION.SDK_INT>=21)
+            {
+                ColorStateList colorStateList = new ColorStateList(
+                        new int[][]{
+                                new int[]{-android.R.attr.state_enabled}, //disabled
+                                new int[]{android.R.attr.state_enabled} //enabled
+                        },
+                        new int[] {
+                                Color.BLACK //disabled
+                                ,Color.WHITE //enabled
+                        }
+                );
+                radioButton.setButtonTintList(colorStateList);//set the color tint list
+                radioButton.invalidate(); //could not be necessary
+            }
+            radioGroup.addView(radioButton);
+        }
+        btn_ok.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int nCheckedId = radioGroup.getCheckedRadioButtonId();
+                GlobalVariables.BUSINESS_RESTAURANT_TABLE = m_resTables.tables.get(nCheckedId).id;
+                tableDlg.dismiss();
+            }
+        });
+        tableDlg.getWindow().setLayout(((GlobalFunctions.getWidth(this) / 100) * 90), LinearLayout.LayoutParams.WRAP_CONTENT);
+
+        tableDlg.show();
+    }
+    private void showOrderDlg()
+    {
+        m_OrderDlg = new Dialog(this);
+        m_OrderDlg.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        m_OrderDlg.setContentView(R.layout.dialog_order_layout);
+        final EditText txt_user_name = m_OrderDlg.findViewById(R.id.txt_user_name);
+        final EditText txt_user_email = m_OrderDlg.findViewById(R.id.txt_user_email);
+        final EditText txt_user_phone = m_OrderDlg.findViewById(R.id.txt_user_phone);
+        final EditText txt_area_address = m_OrderDlg.findViewById(R.id.txt_area_address);
+        final Spinner spinner_area = m_OrderDlg.findViewById(R.id.spinner_area);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.custom_spinner_item, GlobalVariables.BUSSINESS_DELIVERY_AREA);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner_area.setAdapter(adapter);
+        Button btn_ok = m_OrderDlg.findViewById(R.id.btn_ok);
+        Button btn_cancel = m_OrderDlg.findViewById(R.id.btn_cancel);
+
+        btn_ok.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if( txt_user_name.getText().toString().length() < 1 ) {
+                    Toast.makeText(ScanActivity.this, "Insert your name", Toast.LENGTH_LONG).show();
+                    txt_user_name.requestFocus();
+                    return;
+                }
+                if( txt_user_email.getText().toString().length() < 1 || !txt_user_email.getText().toString().contains("@")) {
+                    Toast.makeText(ScanActivity.this, "Insert your email correctly", Toast.LENGTH_LONG).show();
+                    txt_user_email.requestFocus();
+                    return;
+                }
+                if( txt_user_phone.getText().toString().length() < 1 ) {
+                    Toast.makeText(ScanActivity.this, "Insert your phone number", Toast.LENGTH_LONG).show();
+                    txt_user_phone.requestFocus();
+                    return;
+                }
+                if( txt_area_address.getText().toString().length() < 1 ) {
+                    Toast.makeText(ScanActivity.this, "Insert your address", Toast.LENGTH_LONG).show();
+                    txt_area_address.requestFocus();
+                    return;
+                }
+
+                //Send requirement delivery to server.
+                String strArea = spinner_area.getSelectedItem().toString();
+                //minimum is available and total price is bigger than minimum value, then delivery price and tax is 0
+                try {
+                    GlobalVariables.ORDER_DETAIL = new JSONObject();
+                    JSONArray delivery_details = new JSONArray();
+                    int i = 0;
+                    String strPayment = "Cash";
+                    if(GlobalVariables.BUSINESS_PAYMENT_TYPE == GlobalConstants.PAYMENT_CARD)
+                        strPayment = "Card";
+
+                    for(i = 0 ; i < GlobalVariables.SELECTED_PRODUCTS.size(); i ++ )
+                    {
+                        ProductInfo productInfo = GlobalVariables.SELECTED_PRODUCTS.get(i);
+                        if( productInfo.amount < 1 )
+                            continue;
+                        JSONObject product = new JSONObject();
+                        product.put("product_name", productInfo.name);
+                        product.put("product_id", productInfo.id);
+                        product.put("variation_id", productInfo.variation_id);
+                        product.put("business_id", GlobalVariables.BUSINESS_ID);
+                        product.put("location_id",  GlobalVariables.LOCATION_ID);
+                        product.put("tax_id", productInfo.tax);
+                        product.put("product_quantity", productInfo.amount);
+                        product.put("user_name", txt_user_name.getText().toString());
+                        product.put("user_phone", txt_user_phone.getText().toString());
+                        product.put("user_email", txt_user_email.getText().toString());
+                        product.put("order_area", strArea);
+                        product.put("order_area_address", txt_area_address.getText().toString());
+                        product.put("sub_total", GlobalFunctions.roundToDecimal(productInfo.amount * Float.parseFloat(productInfo.getDefault_sell_price()), 3));
+                        product.put("tax", productInfo.getTax());
+                        product.put("discount", productInfo.getDiscount());
+                        product.put("delivery_tax", GlobalFunctions.getDeliveryTax());
+                        product.put("delivery_price", GlobalFunctions.getDeliveryPrice());
+                        product.put("unit_price", productInfo.getDefault_sell_price());
+                        product.put("unit_price_inc_tax", productInfo.getUnitPrice());
+                        product.put("points", GlobalVariables.USED_POINTS_TO_CHECK );
+                        product.put("payment_method", strPayment );
+                        if(productInfo.m_bEnableGroup)
+                            product.put("selling_group", productInfo.strGroup);
+                        else
+                            product.put("selling_group", "Default Selling Price");
+
+                        delivery_details.put(product);
+                    }
+                    GlobalVariables.ORDER_DETAIL.put("delivery_details", delivery_details);
+//                    orderDelivery(jsonOrder);
+//                    m_OrderDlg.setCancelable(false);
+                    Intent cashCheckOut = new Intent(ScanActivity.this, CashCheckOutActivity.class);
+                    startActivityForResult(cashCheckOut, RC_CHECKOUT);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                m_OrderDlg.dismiss();
+            }
+        });
+        btn_cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                m_OrderDlg.dismiss();
+            }
+        });
+        m_OrderDlg.getWindow().setLayout(((GlobalFunctions.getWidth(this) / 100) * 90), LinearLayout.LayoutParams.WRAP_CONTENT);
+        m_OrderDlg.show();
+    }
+
+    //in the case of restaurant, read all products
+    public void getAllProducts()
+    {
+        showpDialog();
+        ApiUtil.get_all_products( new Notify() {
+            @Override
+            public void onSuccess(Object object) {
+                hidepDialog();
+                DeliveryProductInfoResult data = (DeliveryProductInfoResult) object;
+                GlobalVariables.SELECTED_PRODUCTS = data.products;
+                setListData();
+                updateRate();
+            }
+
+            @Override
+            public void onAbort(Object object) {
+                hidepDialog();
+                DeliveryProductInfoResult data = (DeliveryProductInfoResult) object;
+                GlobalFunctions.showAlertdialog(mContext, data.message);
+            }
+
+            @Override
+            public void onFail() {
+                hidepDialog();
+            }
+        });
+    }
+
+    public void getTables()
+    {
+        ApiUtil.get_tables( new Notify() {
+            @Override
+            public void onSuccess(Object object) {
+                hidepDialog();
+                m_resTables = (TableInfo) object;
+                //Show select groups
+                showTableDlg();
+            }
+
+            @Override
+            public void onAbort(Object object) {
+                DeliveryProductInfoResult data = (DeliveryProductInfoResult) object;
+                GlobalFunctions.showAlertdialog(mContext, data.message);
+            }
+
+            @Override
+            public void onFail() {
+            }
+        });
+    }
+
+
+    public void getDeliveryProducts() {
+        showpDialog();
+        ApiUtil.get_delivery_products( new Notify() {
+            @Override
+            public void onSuccess(Object object) {
+                hidepDialog();
+                DeliveryProductInfoResult data = (DeliveryProductInfoResult) object;
+                GlobalVariables.SELECTED_PRODUCTS = data.products;
+                setListData();
+                updateRate();
+            }
+
+            @Override
+            public void onAbort(Object object) {
+                hidepDialog();
+                DeliveryProductInfoResult data = (DeliveryProductInfoResult) object;
+                GlobalFunctions.showAlertdialog(mContext, data.message);
+            }
+
+            @Override
+            public void onFail() {
+                hidepDialog();
+            }
+        });
     }
 }

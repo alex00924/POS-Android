@@ -222,9 +222,14 @@
     <string name="tax_type">(GST: 13%)</string>
     <string name="unit_price">Unit price: %1$s %2$s</string>
     <string name="btn_confirm">Confirm</string>
+    <string name="btn_pay_delivery">Pay For Delivery</string>
     <string name="btn_close">CLOSE</string>
     <string name="btn_cancel">Cancel</string>
     <string name="purchase_success">Thanks for your purchase.</string>
+    <string name="new_delivery_cancel">We are sorry, your delivery order is cancelled by %1$s please try again later.</string>
+    <string name="delivery_complete_sucess">Your order has been delivered to you.</string>
+    <string name="thank_use">Thank you for using Bullet Cart</string>
+    <string name="delivery_complete_fail">Unfortunately you were unable to receive the order from %1$s.</string>
     <string name="code_hint">Code for Cash pay</string>
     <string name="leave_store">Are you sure to leave the store?</string>
     <string name="leave_store_msg">Note: all scanned data will be cleared/lost.</string>
@@ -256,6 +261,7 @@
     <string name="price_txt">Price: </string>
     <string name="unit_price_txt">Unit Price: </string>
     <string name="default_discount_txt">Default Discount: </string>
+    <string name="default_selling_price">Default Selling Price</string>
     <string name="name_txt">Name: </string>
     <string name="exc_tax_txt">Price Exc.Tax: </string>
     <string name="tax_txt">Tax: </string>
@@ -267,8 +273,10 @@
     <string name="xxx_txt">XXX</string>
     <string name="product_detail">Product Details</string>
     <string name="promo_detail">Promo Redeemed - </string>
+    <string name="select_promo">Select Promo</string>
     <string name="btn_next">NEXT</string>
     <string name="stores">Stores</string>
+    <string name="restaurant">Restaurants</string>
     <string name="daily_checkin">Daily Checkins</string>
     <string name="earn_bullets"> Earn Bullets</string>
     <string name="text_stores">Stores</string>
@@ -286,9 +294,12 @@
     <string name="invoice_subtotal">Subtotal</string>
     <string name="invoice_cash">Cash</string>
     <string name="invoice_bdate">Date</string>
+    <string name="invoice_delivery_price">Delivery</string>
+    <string name="invoice_delivery_price_tax">Delivery Tax</string>
     <string name="total_paid">Total Paid</string>
     <string name="total_points">Bullets</string>
     <string name="enter_barcode">Enter BarCode</string>
+    <string name="order_deivery">Order Delivery</string>
     <string name="pay_text">Pay</string>
     <string name="title_invoice">Invoice</string>
     <string name="scan_qr_code">SCAN CODE</string>
@@ -300,4 +311,26 @@
     <string name="redeemed_points">Bullets redeemed: - %1$d = - %2$s%3$s</string>
     <string name="invoice_redeemed_points">- %1$d = - %2$s%3$s</string>
     <string name="not_logged_in">You are not logged in. \n Please login first.</string>
+
+    <string name="dialog_method_title">Select what do you want</string>
+    <string name="dialog_method_delivery">Delivery</string>
+    <string name="dialog_method_direct">Self-Checkout</string>
+
+    <string name="dialog_order_title"> Enter your Details</string>
+    <string name="dialog_order_user_name">Name</string>
+    <string name="dialog_order_user_email">Email</string>
+    <string name="dialog_order_user_phone">Phone Number</string>
+    <string name="dialog_order_area">Select Area :</string>
+    <string name="dialog_order_area_address">Order Area Address</string>
+    <string name="dialog_order_points">Points</string>
+
+    <string name="dialog_table_title">Select Table</string>
+    <string name="dialog_branch_title">Select Branch</string>
+
+    <string name="wait_order_confirm">Please Wait While order is confirmed</string>
+    <string name="wait_delivery">Please Wait While Order is delivered to you.</string>
+    <string name="congrats_delivery_sucess">Congrats! Your order have been delivered</string>
+    <string name="enter_card_content">Please enter your card information</string>
+
+    <string name="wait_order">Please wait until your order is confirmed, don’t close the app or else your order will be cancelled.</string>
 </resources>

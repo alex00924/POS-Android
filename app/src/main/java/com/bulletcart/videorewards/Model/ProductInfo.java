@@ -4,6 +4,7 @@ import com.bulletcart.videorewards.Global.GlobalFunctions;
 import com.bulletcart.videorewards.Global.GlobalVariables;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 public class ProductInfo implements Serializable {
     //Real price = sell_price_inc_tax = dpp_inc_tax * (100 + profit_percent) / 100
@@ -22,11 +23,14 @@ public class ProductInfo implements Serializable {
     public String default_purchase_price;
     public String tax;
     public int variation_id;
-    public int amount = 1;
+    public int amount = 0;
     public String strGroup;
     public boolean m_bEnableGroup = false;  //flag of group
     public float group_price;               //the default selling price group exc tax
     public int   group_price_id = 0;
+
+    public ArrayList<Group> variation_group = new ArrayList<Group>();
+
     //Setter
     public void setId(int id) {
         this.id = id;
@@ -174,5 +178,11 @@ public class ProductInfo implements Serializable {
 
     public int getAmount() {
         return amount;
+    }
+
+    public class Group implements Serializable{
+        public int id;
+        public float price_inc_tax;
+        public String name;
     }
 }

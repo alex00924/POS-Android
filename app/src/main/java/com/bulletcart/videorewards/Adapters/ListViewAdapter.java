@@ -1,13 +1,17 @@
 package com.bulletcart.videorewards.Adapters;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.bulletcart.videorewards.Activities.ScanActivity;
@@ -26,47 +30,29 @@ import com.bulletcart.videorewards.R;
 import java.util.List;
 
 
-public class ListViewAdapter extends BaseSwipeAdapter {
+public class ListViewAdapter extends ArrayAdapter<ProductInfo> {
 
     private Context mContext;
     private ListView mListView;
     private List<ProductInfo> listData;
-
     private ProductListItemCallback mProductListItemCallback;
 
     public ListViewAdapter(Context mContext, ListView mListView, List<ProductInfo> listData, ProductListItemCallback productListItemCallback) {
-
+        super(mContext, R.layout.list_item, listData);
         this.mContext = mContext;
         this.mListView = mListView;
         this.listData = listData;
         this.mProductListItemCallback = productListItemCallback;
     }
-    @Override
-    public int getSwipeLayoutResourceId(int position) {
-        return R.id.swipe;
-    }
     public void refreshAdapter(List<ProductInfo> listData){
         this.listData = listData;
         notifyDataSetChanged();
     }
-    @Override
-    public View generateView(final int position, ViewGroup parent) {
+
+
+    public View getView(final int position,View view,ViewGroup parent) {
 
         View v = LayoutInflater.from(mContext).inflate(R.layout.list_item, null);
-        final SwipeLayout swipeLayout = (SwipeLayout) v.findViewById(getSwipeLayoutResourceId(position));
-        swipeLayout.addSwipeListener(new SimpleSwipeListener() {
-            @Override
-            public void onOpen(SwipeLayout layout) {
-                YoYo.with(Techniques.Tada).duration(500).delay(100).playOn(layout.findViewById(R.id.trash));
-            }
-        });
-        swipeLayout.setOnDoubleClickListener(new SwipeLayout.DoubleClickListener() {
-            @Override
-            public void onDoubleClick(SwipeLayout layout, boolean surface) {
-                //Toast.makeText(mContext, "DoubleClick", Toast.LENGTH_SHORT).show();
-
-            }
-        });
 
         ImageView trash=(ImageView) v.findViewById(R.id.trash);
         trash.setOnClickListener(new View.OnClickListener() {
@@ -113,7 +99,7 @@ public class ListViewAdapter extends BaseSwipeAdapter {
         ibtn_less.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(productInfo.amount > 1){
+                if(productInfo.amount > 0){
 
                     productInfo.amount--;
                     if (mProductListItemCallback != null)
@@ -123,10 +109,50 @@ public class ListViewAdapter extends BaseSwipeAdapter {
         });
 
         fillValues(position, v);
+
+        final RadioGroup promo_group = (RadioGroup)v.findViewById(R.id.promo_group);
+        Log.e("-- promo : ", productInfo.name + productInfo.variation_group.size());
+        if( productInfo.variation_group.size() > 0) {
+            promo_group.setVisibility(View.VISIBLE);
+            RadioButton btn_default_sell = v.findViewById(R.id.btn_radio_default);
+            btn_default_sell.setChecked(true);
+            btn_default_sell.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    productInfo.m_bEnableGroup = false;
+                    if (mProductListItemCallback != null)
+                        mProductListItemCallback.onPromoChanged();
+                }
+            });
+
+            for (int i = 0; i < productInfo.variation_group.size(); i++) {
+                RadioButton btn_group = new RadioButton(mContext);
+                btn_group.setText(productInfo.variation_group.get(i).name);
+                btn_group.setId(i);
+                promo_group.addView(btn_group);
+                if( productInfo.m_bEnableGroup && productInfo.group_price_id == productInfo.variation_group.get(i).id )
+                    btn_group.setChecked(true);
+                else
+                    btn_group.setChecked(false);
+                btn_group.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        int nId = view.getId();
+                        productInfo.m_bEnableGroup = true;
+                        float business_tax = Float.parseFloat(GlobalVariables.BUSINESS_TAX) / 100;
+                        productInfo.group_price = productInfo.variation_group.get(nId).price_inc_tax / ( 1 + business_tax);
+                        productInfo.group_price_id = productInfo.variation_group.get(nId).id;
+                        productInfo.strGroup = productInfo.variation_group.get(nId).name;
+                        if (mProductListItemCallback != null)
+                            mProductListItemCallback.onPromoChanged();
+                    }
+                });
+            }
+
+        }
         return v;
     }
 
-    @Override
     public void fillValues(int position, View convertView) {
         TextView t = convertView.findViewById(R.id.position);
         t.setVisibility(View.INVISIBLE);
@@ -163,7 +189,6 @@ public class ListViewAdapter extends BaseSwipeAdapter {
         return listData;
     }
 
-    @Override
     public ProductInfo getItem(int position) {
         return listData.get(position);
     }
@@ -191,5 +216,6 @@ public class ListViewAdapter extends BaseSwipeAdapter {
     {
         void onIncreaseClicked(ProductInfo productInfo);
         void onDecreaseClicked(ProductInfo productInfo);
+        void onPromoChanged();
     }
 }

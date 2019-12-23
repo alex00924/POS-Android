@@ -138,7 +138,7 @@ public class MainActivity extends ActivityBase implements View.OnClickListener {
 
     // Main functions
     void openWebVideos(){
-        pager.setCurrentItem(1);
+        pager.setCurrentItem(2);
 //        Intent webvids = new Intent(context, FragmentsActivity.class);
 //        webvids.putExtra("show","webvids");
 //        startActivityForResult(webvids,1);
@@ -416,8 +416,8 @@ public class MainActivity extends ActivityBase implements View.OnClickListener {
 
         if(App.getInstance().get("APP_TABS_ENABLE",false)){
 
-            Numboftabs = 2;
-            CharSequence Titles2[] = {getResources().getString(R.string.stores), getResources().getString(R.string.videos)};
+            Numboftabs = 3;
+            CharSequence Titles2[] = {getResources().getString(R.string.stores), getResources().getString(R.string.restaurant), getResources().getString(R.string.videos) + "  (ADS)"};
             adapter =  new ViewPagerAdapter(getSupportFragmentManager(), Titles2, Numboftabs);
             tabs.setVisibility(View.VISIBLE);
 
@@ -545,8 +545,8 @@ public class MainActivity extends ActivityBase implements View.OnClickListener {
         daily_check_in.setOnClickListener(this);
 
         // POS
-        pos = findViewById(R.id.nav_pos);
-        pos.setOnClickListener(this);
+//        pos = findViewById(R.id.nav_pos);
+//        pos.setOnClickListener(this);
 
         // Sign in
         sign_in = findViewById(R.id.nav_sign_in);
@@ -841,11 +841,11 @@ public class MainActivity extends ActivityBase implements View.OnClickListener {
                 if (checkLogIn()) openWebVideos();
                 mDrawerLayout.closeDrawers();
                 break;
-            case R.id.nav_pos:
-                Intent pos = new Intent(context, StoresActivity.class);
-                startActivity(pos);
-                mDrawerLayout.closeDrawers();
-                break;
+//            case R.id.nav_pos:
+//                Intent pos = new Intent(context, StoresActivity.class);
+//                startActivity(pos);
+//                mDrawerLayout.closeDrawers();
+//                break;
             case R.id.nav_sign_in:
                 Intent in = new Intent(context, LoginActivity.class);
                 startActivity(in);

@@ -75,6 +75,15 @@ public class CashCheckRecyclerAdapter extends RecyclerView.Adapter<CashCheckRecy
             tv_total_price.setText(String.format("%s%s%.2f", GlobalVariables.BUSINESS_CURRENCY, " ", GlobalVariables.TOTAL_PRICE_TO_CHECK));
 //            tv_added_points.setText(String.format("- %d point(s)", GlobalVariables.USED_POINTS_TO_CHECK));
             tv_added_points.setText(context.getString(R.string.redeemed_points, GlobalVariables.USED_POINTS_TO_CHECK, GlobalVariables.CURRENCY_OF_USED_POINTS_TO_CHECK, GlobalVariables.BUSINESS_CURRENCY));
+            if(GlobalVariables.BUSINESS_IS_DELYVERY) {
+                holder.row.findViewById(R.id.txt_delivery).setVisibility(View.VISIBLE);
+                ((TextView) holder.row.findViewById(R.id.txt_delivery)).setText( context.getString(R.string.invoice_delivery_price) + ": " + GlobalFunctions.getDeliveryPrice() +  " " + GlobalVariables.BUSINESS_CURRENCY + ",  " +
+                        context.getString(R.string.invoice_delivery_price_tax) + ": " + GlobalFunctions.getDeliveryTax() + " " + GlobalVariables.BUSINESS_CURRENCY);
+            }
+            else {
+                holder.row.findViewById(R.id.txt_delivery).setVisibility(View.GONE);
+            }
+
         } else {
             ProductInfo productInfo;
             productInfo = mData.get(position - 1);

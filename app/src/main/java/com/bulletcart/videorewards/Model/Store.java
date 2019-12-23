@@ -14,7 +14,15 @@ public class Store {
     public String currency;
     public String tax;
     public String merchant_currency;
-    public List<String> selling_group = new ArrayList<>();
+    public ArrayList<String> selling_group = new ArrayList<>();
+
+    public boolean can_delivery;
+    public ArrayList<String> delivery_area = new ArrayList<>();
+    public float delivery_charge;
+    public String delivery_tax_type;
+    public float delivery_tax;
+    public int delivery_is_minimum;
+    public float delivery_minimum;
 
     public String getTax_type() {
         return tax_type;

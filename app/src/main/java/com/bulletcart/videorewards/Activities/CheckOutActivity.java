@@ -1,5 +1,6 @@
 package com.bulletcart.videorewards.Activities;
 
+import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
@@ -75,6 +76,8 @@ public class CheckOutActivity extends ActivityBase implements
     boolean backTrack = false;
 
     private boolean mShowingBack = false;
+
+    private boolean mIsProcRunning = false;
 
     String cardNumber, cardCVV, cardValidity, cardName;
     @Override
@@ -154,7 +157,6 @@ public class CheckOutActivity extends ActivityBase implements
 
 
 //        setTotalPrice();
-
     }
 
     public void setTotalPrice() {
@@ -255,8 +257,11 @@ public class CheckOutActivity extends ActivityBase implements
         // Send this nonce to your server
         String nonce = paymentMethodNonce.getNonce();
 //        GlobalFunction.hideClassicProgressDialog(progressDialog);
-
-        processPayment(nonce, GlobalVariables.CARD_TYPE, "CreditCard");
+        if(GlobalVariables.BUSINESS_IS_DELYVERY) {
+            processPaymentForDelivery(nonce, GlobalVariables.CARD_TYPE, "CreditCard");
+        } else {
+            processPayment(nonce, GlobalVariables.CARD_TYPE, "CreditCard");
+        }
         Log.d("Braintree-nonce=>", nonce);
     }
 
@@ -287,11 +292,49 @@ public class CheckOutActivity extends ActivityBase implements
     }
 
 
+    private void processPaymentForDelivery(String nonce, String card_type, String pay_type) {
+        if(mIsProcRunning)
+            return;
+        mIsProcRunning = true;
+        showpDialog();
+        ApiUtil.process_payment_for_delivery(nonce, new Notify() {
+            @Override
+            public void onSuccess(Object object) {
+                mIsProcRunning = false;
+                hidepDialog();
+                GlobalFunctions.showToast(context, getString(R.string.card_added));
+                Intent returnIntent = new Intent();
+                setResult(Activity.RESULT_OK,returnIntent);
+                finish();
+            }
+
+            @Override
+            public void onAbort(Object object) {
+                mIsProcRunning = false;
+                hidepDialog();
+                GlobalFunctions.hideProgressDialog();
+                GlobalFunctions.showToast(context, getString(R.string.whoops));
+            }
+
+            @Override
+            public void onFail() {
+                mIsProcRunning = false;
+                hidepDialog();
+                GlobalFunctions.hideProgressDialog();
+                GlobalFunctions.showToast(context, getString(R.string.whoops));
+            }
+        });
+    }
+
     private void processPayment(String nonce, String card_type, String pay_type) {
+        if(mIsProcRunning)
+            return;
+        mIsProcRunning = true;
         showpDialog();
         ApiUtil.process_payment(nonce, card_type, pay_type, new Notify() {
             @Override
             public void onSuccess(Object object) {
+                mIsProcRunning = false;
                 hidepDialog();
                 App.getInstance().setUsedPoints(GlobalVariables.USED_POINTS_TO_CHECK);
                 TransactionResult data = (TransactionResult) object;
@@ -305,6 +348,7 @@ public class CheckOutActivity extends ActivityBase implements
 
             @Override
             public void onAbort(Object object) {
+                mIsProcRunning = false;
                 hidepDialog();
                 GlobalFunctions.hideProgressDialog();
                 GlobalFunctions.showToast(context, getString(R.string.whoops));
@@ -312,6 +356,7 @@ public class CheckOutActivity extends ActivityBase implements
 
             @Override
             public void onFail() {
+                mIsProcRunning = false;
                 hidepDialog();
                 GlobalFunctions.hideProgressDialog();
                 GlobalFunctions.showToast(context, getString(R.string.whoops));
@@ -354,8 +399,13 @@ public class CheckOutActivity extends ActivityBase implements
         if (pos > 0) {
             viewPager.setCurrentItem(pos - 1);
         } else {
-            Intent mIntent = new Intent(context, ScanActivity.class);
-            startActivity(mIntent);
+            if(GlobalVariables.BUSINESS_IS_DELYVERY) {
+                Intent returnIntent = new Intent();
+                setResult(Activity.RESULT_CANCELED,returnIntent);
+            } else {
+                Intent mIntent = new Intent(context, ScanActivity.class);
+                startActivity(mIntent);
+            }
             finish();
         }
     }

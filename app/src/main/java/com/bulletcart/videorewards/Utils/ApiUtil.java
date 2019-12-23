@@ -2,14 +2,17 @@ package com.bulletcart.videorewards.Utils;
 
 import android.util.Log;
 
+import com.bulletcart.videorewards.ApiResult.DeliveryProductInfoResult;
 import com.bulletcart.videorewards.ApiResult.GroupPrice;
 import com.bulletcart.videorewards.ApiResult.ProductInfoResult;
 import com.bulletcart.videorewards.ApiResult.ResponseData;
 import com.bulletcart.videorewards.ApiResult.StoreInfoResult;
 import com.bulletcart.videorewards.ApiResult.TransactionResult;
+import com.bulletcart.videorewards.Global.GlobalConstants;
 import com.bulletcart.videorewards.Global.GlobalFunctions;
 import com.bulletcart.videorewards.Global.GlobalVariables;
 import com.bulletcart.videorewards.Model.ProductInfo;
+import com.bulletcart.videorewards.Model.TableInfo;
 import com.bulletcart.videorewards.api.ApiClient;
 import com.bulletcart.videorewards.app.App;
 
@@ -24,6 +27,114 @@ import retrofit2.Response;
 
 public class ApiUtil {
     public static final String TAG = "ApiUtil---------->";
+
+    public static void get_all_products(final Notify notify) {
+        Call<DeliveryProductInfoResult> call = ApiClient.getApiClient().get_all_products(GlobalVariables.BUSINESS_ID, GlobalVariables.LOCATION_ID);
+        call.enqueue(new Callback<DeliveryProductInfoResult>() {
+            @Override
+            public void onResponse(Call<DeliveryProductInfoResult> call, Response<DeliveryProductInfoResult> response) {
+
+                DeliveryProductInfoResult data = response.body();
+                if (response.isSuccessful()) {
+                    if (data.status.equals("success")) {
+                        if (notify != null) {
+                            notify.onSuccess(data);
+                        }
+                    } else {
+                        if (notify != null)
+                            notify.onAbort(data);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<DeliveryProductInfoResult> call, Throwable t) {
+
+                if (notify != null)
+                    notify.onFail();
+            }
+        });
+    }
+
+    public static void get_tables(final Notify notify) {
+        Call<TableInfo> call = ApiClient.getApiClient().get_tables(GlobalVariables.BUSINESS_ID, GlobalVariables.LOCATION_ID);
+        call.enqueue(new Callback<TableInfo>() {
+            @Override
+            public void onResponse(Call<TableInfo> call, Response<TableInfo> response) {
+
+                TableInfo data = response.body();
+                if (response.isSuccessful()) {
+                    if (data.status.equals("success")) {
+                        if (notify != null) {
+                            notify.onSuccess(data);
+                        }
+                    } else {
+                        if (notify != null)
+                            notify.onAbort(data);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<TableInfo> call, Throwable t) {
+
+                if (notify != null)
+                    notify.onFail();
+            }
+        });
+    }
+
+
+    public static void get_delivery_products(final Notify notify) {
+        Call<DeliveryProductInfoResult> call = ApiClient.getApiClient().get_delivery_products(GlobalVariables.BUSINESS_ID, GlobalVariables.LOCATION_ID);
+        call.enqueue(new Callback<DeliveryProductInfoResult>() {
+            @Override
+            public void onResponse(Call<DeliveryProductInfoResult> call, Response<DeliveryProductInfoResult> response) {
+
+                DeliveryProductInfoResult data = response.body();
+                if (response.isSuccessful()) {
+                    if (data.status.equals("success")) {
+                        if (notify != null) {
+                            notify.onSuccess(data);
+                        }
+                    } else {
+                        if (notify != null)
+                            notify.onAbort(data);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<DeliveryProductInfoResult> call, Throwable t) {
+
+                if (notify != null)
+                    notify.onFail();
+            }
+        });
+    }
+
+    public static void order_delivery( JSONObject order_detail, final Notify notify) {
+
+        RequestBody body = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), order_detail.toString());
+        Call<ResponseData> call = ApiClient.getApiClient().order_delivery(body);
+        call.enqueue(new Callback<ResponseData>() {
+            @Override
+            public void onResponse(Call<ResponseData> call, Response<ResponseData> response) {
+                if (response.isSuccessful()) {
+                    if(response.body().status.equals("success")) {
+                        Log.e("++++CASH-- : ", response.body().message);
+                        if (notify != null)
+                            notify.onSuccess(response.body());
+                    }
+                }
+            }
+            @Override
+            public void onFailure(Call<ResponseData> call, Throwable t) {
+                if (notify != null)
+                    notify.onFail();
+            }
+        });
+    }
 
     public static void get_product(String barcode, final Notify notify) {
         Call<ProductInfoResult> call = ApiClient.getApiClient().get_product(barcode, GlobalVariables.BUSINESS_ID, GlobalVariables.LOCATION_ID);
@@ -68,8 +179,8 @@ public class ApiUtil {
         });
     }
 
-    public static void get_stores(final Notify notify) {
-        Call<StoreInfoResult> call = ApiClient.getApiClient().get_stores();
+    public static void get_stores(int nType, final Notify notify) {
+        Call<StoreInfoResult> call = ApiClient.getApiClient().get_stores(nType);
         call.enqueue(new Callback<StoreInfoResult>() {
             @Override
             public void onResponse(Call<StoreInfoResult> call, Response<StoreInfoResult> response) {
@@ -119,7 +230,11 @@ public class ApiUtil {
 //                jsonProductsObject.put("point_ratio", GlobalVariables.POINT_CURRENCY_RATIO);
                 jsonProductsObject.put("point_ratio", App.getInstance().getRatio());
                 jsonProductsObject.put("products", jsonProductObject);
+                jsonProductsObject.put("is_delivery", GlobalVariables.BUSINESS_IS_DELYVERY);
+                jsonProductsObject.put("delivery_uid", GlobalVariables.BUSINESS_DELIVERY_UID);
 
+                if(GlobalVariables.BUSINESS_TYPE == GlobalConstants.BUSINESS_TYPE_RESTAURANT  && !GlobalVariables.BUSINESS_IS_DELYVERY)
+                    jsonProductsObject.put("res_table_id", GlobalVariables.BUSINESS_RESTAURANT_TABLE);
                 Log.e("----CASH : ", jsonProductsObject.toString());
 
             RequestBody body = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), jsonProductsObject.toString());
@@ -241,9 +356,17 @@ public class ApiUtil {
             fullJson.put("type", pay_method);
             fullJson.put("business_id", GlobalVariables.BUSINESS_ID);
             fullJson.put("location_id", GlobalVariables.LOCATION_ID);
+            fullJson.put("is_delivery", GlobalVariables.BUSINESS_IS_DELYVERY);
+            if(GlobalVariables.BUSINESS_IS_DELYVERY) {
+                fullJson.put("delivery_uid", GlobalVariables.BUSINESS_DELIVERY_UID);
+            }
 
+            if(GlobalVariables.BUSINESS_TYPE == GlobalConstants.BUSINESS_TYPE_RESTAURANT  && !GlobalVariables.BUSINESS_IS_DELYVERY)
+                fullJson.put("res_table_id", GlobalVariables.BUSINESS_RESTAURANT_TABLE);
 
             for(int i = 0; i < GlobalVariables.SELECTED_PRODUCTS.size(); i++) {
+                if( GlobalVariables.SELECTED_PRODUCTS.get(i).amount < 1 )
+                    continue;
                 ProductInfo data = GlobalVariables.SELECTED_PRODUCTS.get(i);
                 JSONObject productItemJson = new JSONObject();
                 productItemJson.put("unit_price", data.getDefault_sell_price());
@@ -267,6 +390,44 @@ public class ApiUtil {
 
             RequestBody body = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), fullJson.toString());
             Call<TransactionResult> call = ApiClient.getApiClient().process_payment(body);
+            call.enqueue(new Callback<TransactionResult>() {
+                @Override
+                public void onResponse(Call<TransactionResult> call, Response<TransactionResult> response) {
+                    if (response.isSuccessful()) {
+                        if(response.body().status.equals("success")) {
+
+                            Log.e("++++CARD-- : ", response.body().message);
+                            if (notify != null)
+                                notify.onSuccess(response.body());
+                        } else {
+                            if (notify != null)
+                                notify.onFail();
+                        }
+                    }
+                }
+                @Override
+                public void onFailure(Call<TransactionResult> call, Throwable t) {
+                    if (notify != null)
+                        notify.onFail();
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void process_payment_for_delivery(String nonce, final Notify notify) {
+        JSONObject fullJson = new JSONObject();
+        try {
+            fullJson.put("nonce", nonce);
+            float fVal = GlobalVariables.TOTAL_PRICE_TO_CHECK * GlobalVariables.CURRENCY_RATIO_TO_MERCHANT;
+            float converted_total_price = GlobalFunctions.roundToDecimal(fVal, 2);
+            fullJson.put("amount_for_braintree", String.valueOf(converted_total_price));
+            fullJson.put("location_id", GlobalVariables.LOCATION_ID);
+            fullJson.put("order_uid", GlobalVariables.BUSINESS_DELIVERY_UID);
+
+            RequestBody body = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), fullJson.toString());
+            Call<TransactionResult> call = ApiClient.getApiClient().process_for_delivery(body);
             call.enqueue(new Callback<TransactionResult>() {
                 @Override
                 public void onResponse(Call<TransactionResult> call, Response<TransactionResult> response) {

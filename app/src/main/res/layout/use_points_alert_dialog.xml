@@ -101,7 +101,8 @@
             <!--android:text="@string/btn_confirm"/>-->
             <LinearLayout
                 android:id="@+id/btn_cash"
-                android:layout_width="100dp"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="30dp"
                 android:gravity="center"
                 android:clickable="true"
@@ -127,7 +128,8 @@
 
             <LinearLayout
                 android:id="@+id/btn_ccard"
-                android:layout_width="100dp"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="30dp"
                 android:gravity="center"
                 android:clickable="true"
@@ -154,7 +156,8 @@
                 android:layout_width="0dp"
                 android:layout_height="30dp"
                 android:layout_weight="1"
-                android:gravity="end">
+                android:gravity="end"
+                android:id="@+id/cancel_layout">
 
                 <TextView
                     android:id="@+id/btn_cancel"

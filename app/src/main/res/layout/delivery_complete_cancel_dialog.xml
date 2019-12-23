@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal"
+    android:background="@color/white"
+    android:orientation="vertical">
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="22sp"
+        android:layout_margin="10dp"
+        android:gravity="center"
+        android:textColor="@color/red"
+        android:text="@string/delivery_complete_fail"
+        android:id="@+id/txt_title"/>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="22sp"
+        android:layout_margin="10dp"
+        android:gravity="center"
+        android:textColor="#4CAF50"
+        android:text="@string/thank_use"
+        />
+    <Button
+        android:id="@+id/btn_close"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:gravity="center"
+        android:textColor="@color/colorAccent"
+        android:textStyle="bold"
+        android:textSize="18sp"
+        android:background="@color/white"
+        android:text="@string/btn_close"/>
+</LinearLayout>

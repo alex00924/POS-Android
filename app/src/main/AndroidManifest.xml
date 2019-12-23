@@ -173,7 +173,8 @@
         <activity android:name=".Activities.SingleDetailActivity"
             android:screenOrientation="portrait"/>
         <activity android:name=".Activities.CashCheckOutActivity"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait"
+            android:launchMode="singleTop"/>
         <activity android:name=".Activities.CheckOutActivity"
             android:screenOrientation="portrait"/>
         <activity android:name=".Activities.BillActivity"

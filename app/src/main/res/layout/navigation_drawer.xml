@@ -136,21 +136,21 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <FrameLayout
-                    android:id="@+id/nav_pos"
-                    style="@style/NavDrawerRowLayout">
+                <!--<FrameLayout-->
+                    <!--android:id="@+id/nav_pos"-->
+                    <!--style="@style/NavDrawerRowLayout">-->
 
-                    <com.bulletcart.videorewards.Views.TintOnStateImageView
-                        style="@style/NavDrawerRowItemIcon"
-                        android:src="@drawable/ic_shop"
-                        tools:ignore="ContentDescription"/>
+                    <!--<com.bulletcart.videorewards.Views.TintOnStateImageView-->
+                        <!--style="@style/NavDrawerRowItemIcon"-->
+                        <!--android:src="@drawable/ic_shop"-->
+                        <!--tools:ignore="ContentDescription"/>-->
 
-                    <TextView
-                        style="@style/NavDrawerRowItemText"
-                        android:text="@string/text_stores"
-                        tools:fontFamily="sans-serif-medium"/>
+                    <!--<TextView-->
+                        <!--style="@style/NavDrawerRowItemText"-->
+                        <!--android:text="@string/text_stores"-->
+                        <!--tools:fontFamily="sans-serif-medium"/>-->
 
-                </FrameLayout>
+                <!--</FrameLayout>-->
 
                 <FrameLayout
                     android:id="@+id/nav_daily_checkin"

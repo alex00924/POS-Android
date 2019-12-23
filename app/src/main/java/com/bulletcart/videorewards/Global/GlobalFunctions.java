@@ -7,11 +7,15 @@ import android.content.DialogInterface;
 import android.os.Build;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.util.DisplayMetrics;
+import android.util.Log;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.bulletcart.videorewards.Activities.CashCheckOutActivity;
 import com.bulletcart.videorewards.Activities.MainActivity;
 import com.bulletcart.videorewards.R;
 import com.bulletcart.videorewards.Utils.CustomRequest;
@@ -121,15 +125,17 @@ public class GlobalFunctions {
     public static void updateMyPoints(final Context context, final Notify notify) {
 
         final int used_points = App.getInstance().getUsedPoints();
-        if (used_points > 0) {
+        Log.e("POINTS:::", "-----" + used_points);
+        if (used_points != 0) {
             CustomRequest balanceRequest = new CustomRequest(Request.Method.POST, UPDATE_BALANCE_AFTER_POS,null,
                     new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
                             try{
                                 if(!response.getBoolean("error")){
-
+                                    Log.e("POINTS-Result:::", "-----" + response.getString("user_balance"));
                                     MainActivity.setOptionTitle(context.getString(R.string.app_currency).toUpperCase()+" : " +response.getString("user_balance"));
+                                    CashCheckOutActivity.setOptionTitle(context.getString(R.string.app_currency).toUpperCase()+" : " +response.getString("user_balance"));
                                     App.getInstance().store("balance",response.getString("user_balance"));
                                     App.getInstance().setUsedPoints(0);
                                     if (notify != null) {
@@ -200,4 +206,47 @@ public class GlobalFunctions {
         App.getInstance().addToRequestQueue(balanceRequest);
 
     }
+
+    public static float getDeliveryTax()
+    {
+        if( GlobalVariables.BUSSINESS_DELIVEY_IS_MINIMUM == 1 && GlobalVariables.TOTAL_PAIABLE_WITHOUT_DELIVERY >= GlobalVariables.BUSSINESS_DELIVEY_MINIMUM )
+            return 0;
+        return  GlobalVariables.BUSSINESS_DELIVEY_TAX * GlobalVariables.BUSSINESS_DELIVERY_CHARGE / 100.0f;
+    }
+
+    public static float getDeliveryPrice()
+    {
+        float fDeliveryTax = GlobalVariables.BUSSINESS_DELIVEY_TAX * GlobalVariables.BUSSINESS_DELIVERY_CHARGE;
+        float fDelivery = GlobalVariables.BUSSINESS_DELIVERY_CHARGE;
+
+        if( GlobalVariables.BUSSINESS_DELIVEY_IS_MINIMUM == 1 && GlobalVariables.TOTAL_PAIABLE_WITHOUT_DELIVERY >= GlobalVariables.BUSSINESS_DELIVEY_MINIMUM )
+        {
+            fDeliveryTax = 0;
+            fDelivery = 0;
+        }
+        else
+        {
+            fDeliveryTax = fDelivery * GlobalVariables.BUSSINESS_DELIVEY_TAX / 100.0f;
+            if(GlobalVariables.BUSSINESS_DELIVEY_TAX_TYPE.equals("inclusive"))
+            {
+                fDelivery -= fDeliveryTax;
+            }
+        }
+        return fDelivery;
+    }
+
+    public static int getWidth(Context context) {
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        WindowManager windowmanager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        windowmanager.getDefaultDisplay().getMetrics(displayMetrics);
+        return displayMetrics.widthPixels;
+    }
+
+    public static int getHeight(Context context) {
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        WindowManager windowmanager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        windowmanager.getDefaultDisplay().getMetrics(displayMetrics);
+        return displayMetrics.heightPixels;
+    }
+
 }

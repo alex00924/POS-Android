@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "291650831240",
+    "firebase_url": "https://posandroid-47f2b.firebaseio.com",
+    "project_id": "posandroid-47f2b",
+    "storage_bucket": "posandroid-47f2b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:291650831240:android:50adcb6a17d2edee",
+        "android_client_info": {
+          "package_name": "com.bulletcart.videorewards"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "291650831240-oa6otemmf2rpntt4fsbr8j0s0gt1br7d.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bulletcart.videorewards",
+            "certificate_hash": "348887a948e42cb7fe2b8397557b9717faff82be"
+          }
+        },
+        {
+          "client_id": "291650831240-7st2n0js6s2qasce2e4a9ivce6c2tdfq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCJSl8i41HsSwdiCnhEqlYmg5tzlXjYfH4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "291650831240-7st2n0js6s2qasce2e4a9ivce6c2tdfq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
